@@ -25,7 +25,7 @@ with tf.Graph().as_default():
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
     sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
     with sess.as_default():
-        pnet, rnet, onet = detect_face.create_mtcnn(sess, './Path to det1.npy,..')
+        pnet, rnet, onet = detect_face.create_mtcnn(sess, '')
 
         minsize = 20  # minimum size of face
         threshold = [0.6, 0.7, 0.7]  # three steps's threshold
@@ -39,7 +39,7 @@ with tf.Graph().as_default():
         HumanNames = ['Human_a','Human_b','Human_c','...','Human_h']    #train human name
 
         print('Loading feature extraction model')
-        modeldir = '/..Path to pre-trained model../20170512-110547/20170512-110547.pb'
+        modeldir = 'facemodel.pb'
         facenet.load_model(modeldir)
 
         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
@@ -47,13 +47,13 @@ with tf.Graph().as_default():
         phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
         embedding_size = embeddings.get_shape()[1]
 
-        classifier_filename = '/..Path to classifier model../my_classifier.pkl'
+        classifier_filename = 'pkl/classifier.pkl'
         classifier_filename_exp = os.path.expanduser(classifier_filename)
         with open(classifier_filename_exp, 'rb') as infile:
             (model, class_names) = pickle.load(infile)
             print('load classifier file-> %s' % classifier_filename_exp)
 
-        video_capture = cv2.VideoCapture(0)
+        # video_capture = cv2.VideoCapture(0)
         c = 0
 
         # #video writer
@@ -63,8 +63,8 @@ with tf.Graph().as_default():
         print('Start Recognition!')
         prevTime = 0
         while True:
-            ret, frame = video_capture.read()
-
+            # ret, frame = video_capture.read()
+            frame = cv2.imread('abc.jpg',0)
             frame = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)    #resize frame (optional)
 
             curTime = time.time()    # calc fps
@@ -112,6 +112,7 @@ with tf.Graph().as_default():
                         feed_dict = {images_placeholder: scaled_reshape[0], phase_train_placeholder: False}
                         emb_array[0, :] = sess.run(embeddings, feed_dict=feed_dict)
                         predictions = model.predict_proba(emb_array)
+                        print(predictions)
                         best_class_indices = np.argmax(predictions, axis=1)
                         best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
                         cv2.rectangle(frame, (bb[i][0], bb[i][1]), (bb[i][2], bb[i][3]), (0, 255, 0), 2)    #boxing face
@@ -119,12 +120,13 @@ with tf.Graph().as_default():
                         #plot result idx under box
                         text_x = bb[i][0]
                         text_y = bb[i][3] + 20
-                        # print('result: ', best_class_indices[0])
+                        print(best_class_probabilities)
+                        print('result: ', best_class_indices[0])
                         for H_i in HumanNames:
                             if HumanNames[best_class_indices[0]] == H_i:
                                 result_names = HumanNames[best_class_indices[0]]
-                                cv2.putText(frame, result_names, (text_x, text_y), cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                                            1, (0, 0, 255), thickness=1, lineType=2)
+                                #cv2.putText(frame, result_names, (text_x, text_y), cv2.FONT_HERSHEY_COMPLEX_SMALL,
+                                #            1, (0, 0, 255), thickness=1, lineType=2)
                 else:
                     print('Unable to align')
 
@@ -134,15 +136,15 @@ with tf.Graph().as_default():
             str = 'FPS: %2.3f' % fps
             text_fps_x = len(frame[0]) - 150
             text_fps_y = 20
-            cv2.putText(frame, str, (text_fps_x, text_fps_y),
-                        cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), thickness=1, lineType=2)
+           # cv2.putText(frame, str, (text_fps_x, text_fps_y),
+            #            cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), thickness=1, lineType=2)
             # c+=1
-            cv2.imshow('Video', frame)
+            # cv2.imshow('Video', frame)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+               # break
 
-        video_capture.release()
+        # video_capture.release()
         # #video writer
         # out.release()
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
