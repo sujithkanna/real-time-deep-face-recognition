@@ -43,6 +43,8 @@ with tf.Graph().as_default():
         HumanNames = os.listdir(train_img)
         HumanNames.sort()
 
+        print(HumanNames)
+
         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
         embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
         phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
