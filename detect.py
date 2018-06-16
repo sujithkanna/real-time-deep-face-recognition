@@ -19,8 +19,9 @@ import math
 import pickle
 from sklearn.svm import SVC
 from sklearn.externals import joblib
+import json
 
-print('Creating networks and loading parameters')
+# print('Creating networks and loading parameters')
 with tf.Graph().as_default():
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
     sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
@@ -35,7 +36,7 @@ with tf.Graph().as_default():
         image_size = 182
         input_image_size = 160
 
-        print('Loading feature extraction model')
+        # print('Loading feature extraction model')
         model_directory = 'facemodel.pb'
         facenet.load_model(model_directory)
 
@@ -43,7 +44,7 @@ with tf.Graph().as_default():
         HumanNames = os.listdir(train_img)
         HumanNames.sort()
 
-        print(HumanNames)
+        # print(HumanNames)
 
         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
         embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
@@ -54,9 +55,9 @@ with tf.Graph().as_default():
         classifier_filename_exp = os.path.expanduser(classifier_filename)
         with open(classifier_filename_exp, 'rb') as infile:
             (model, class_names) = pickle.load(infile)
-            print('load classifier file-> %s' % classifier_filename_exp)
+            # print('load classifier file-> %s' % classifier_filename_exp)
 
-        print('Start Recognition!')
+        # print('Start Recognition!')
         prevTime = 0
         # ret, frame = video_capture.read()
         frame = cv2.imread('abc.jpg', 0)
@@ -67,7 +68,7 @@ with tf.Graph().as_default():
         frame = frame[:, :, 0:3]
         bounding_boxes, _ = detect_face.detect_face(frame, minsize, pnet, rnet, onet, threshold, factor)
         number_of_faces = bounding_boxes.shape[0]
-        print('Detected_FaceNum: %d' % number_of_faces)
+        # print('Detected_FaceNum: %d' % number_of_faces)
 
         if number_of_faces > 0:
             det = bounding_boxes[:, 0:4]
@@ -88,7 +89,7 @@ with tf.Graph().as_default():
 
                 # inner exception
                 if bb[i][0] <= 0 or bb[i][1] <= 0 or bb[i][2] >= len(frame[0]) or bb[i][3] >= len(frame):
-                    print('face is inner of range!')
+                    # print('face is inner of range!')
                     continue
 
                 cropped.append(frame[bb[i][1]:bb[i][3], bb[i][0]:bb[i][2], :])
@@ -104,11 +105,13 @@ with tf.Graph().as_default():
                 best_class_indices = np.argmax(predictions, axis=1)
                 best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
 
-                print('Predictions', predictions)
-                print('Indices', best_class_indices)
-                print('Properties', best_class_probabilities)
-                print('result: ', best_class_indices[0])
-                print('Name', HumanNames[best_class_indices[0]])
+                # print('Predictions', predictions)
+                # print('Indices', best_class_indices)
+                # print('Properties', best_class_probabilities)
+                # print('result: ', best_class_indices[0])
+                # print('Name', HumanNames[best_class_indices[0]])
+                print('{"index":%s}'%(best_class_indices[0]))
+                sys.stdout.flush()
                 # for H_i in HumanNames:
                 #         # print(H_i)
                 #         if HumanNames[best_class_indices[0]] == H_i:
