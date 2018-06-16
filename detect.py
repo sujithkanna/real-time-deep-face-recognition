@@ -39,6 +39,10 @@ with tf.Graph().as_default():
         model_directory = 'facemodel.pb'
         facenet.load_model(model_directory)
 
+        train_img = 'images'
+        HumanNames = os.listdir(train_img)
+        HumanNames.sort()
+
         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
         embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
         phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
@@ -97,11 +101,16 @@ with tf.Graph().as_default():
                 predictions = model.predict_proba(emb_array)
                 best_class_indices = np.argmax(predictions, axis=1)
                 best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
-                cv2.rectangle(frame, (bb[i][0], bb[i][1]), (bb[i][2], bb[i][3]), (0, 255, 0), 2)  # boxing face
 
                 print('Predictions', predictions)
                 print('Indices', best_class_indices)
                 print('Properties', best_class_probabilities)
                 print('result: ', best_class_indices[0])
+
+                for H_i in HumanNames:
+                        # print(H_i)
+                        if HumanNames[best_class_indices[0]] == H_i:
+                            result_names = HumanNames[best_class_indices[0]]
+                        print(result_names)
         else:
             print('Unable to align')
