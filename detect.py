@@ -108,11 +108,11 @@ with tf.Graph().as_default():
                 print('Indices', best_class_indices)
                 print('Properties', best_class_probabilities)
                 print('result: ', best_class_indices[0])
-
-                for H_i in HumanNames:
-                        # print(H_i)
-                        if HumanNames[best_class_indices[0]] == H_i:
-                            result_names = HumanNames[best_class_indices[0]]
-                        print(result_names)
+                print('Name', HumanNames[best_class_indices[0]])
+                # for H_i in HumanNames:
+                #         # print(H_i)
+                #         if HumanNames[best_class_indices[0]] == H_i:
+                #             result_names = HumanNames[best_class_indices[0]]
+                #         print(result_names)
         else:
             print('Unable to align')
